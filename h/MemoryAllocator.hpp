@@ -1,18 +1,18 @@
 #include "../lib/hw.h"
 
-struct FreeSegment {
+struct AllocatedSegment {
     size_t size;
-    FreeSegment* next;
+    AllocatedSegment* next;
 };
 
 class MemoryAllocator {
 public:
     void* alloc (size_t blocks);
-    int mem_free (void* address);
+    int free (void* address);
 
     static MemoryAllocator& getInstance ();
 
 private:
-    FreeSegment* firstFreeSegment;
+    AllocatedSegment* firstAllocatedSegment;
     MemoryAllocator ();
 };
