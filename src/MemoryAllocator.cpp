@@ -27,7 +27,20 @@ void* MemoryAllocator::alloc (size_t blocks) {
 }
 
 int MemoryAllocator::free (void* address) {
-
+    AllocatedSegment *curr = 0, *next = firstAllocatedSegment;
+    while (next != (AllocatedSegment*) HEAP_END_ADDR) {
+        if ((char*) next + MEM_BLOCK_SIZE == (char*) address) {
+            if (curr) {
+                curr->next = next->next;
+            } else {
+                firstAllocatedSegment = next->next;
+            }
+            return 0;
+        }
+        curr = next;
+        next = next->next;
+    }
+    return -1;
 }
 
 MemoryAllocator& MemoryAllocator::getInstance () {
