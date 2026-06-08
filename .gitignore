@@ -1,0 +1,22 @@
+# === Privremeni fajlovi kompajlera (Iz tvog Makefile-a) ===
+build/
+*.o
+*.d
+*.lst
+
+# === Krajnji binarci i asemblerski izvodi ===
+kernel
+kernel.asm
+
+# === CLion i IDE podešavanja ===
+.idea/
+cmake-build-debug/
+.clang-format
+
+# === Mac specifični fajlovi (Skriveno đubre koje macOS pravi) ===
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# === GDB i privremeni fajlovi ===
+.gdbinit
