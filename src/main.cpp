@@ -1,6 +1,7 @@
 #include "../lib/hw.h"
 #include "../lib/console.h"
 #include "../h/MemoryAllocator.hpp"
+#include "../h/syscall_c.hpp"
 
 extern "C" {
     void interruptRoutine ();
@@ -17,5 +18,9 @@ extern "C" {
 }
 
 void main () {
+    __putc('h');
     asm volatile ("csrw stvec, %[interruptRoutine]" : : [interruptRoutine] "r" (&interruptRoutine));
+    __putc('s');
+    mem_alloc(120);
+    __putc('e');
 }

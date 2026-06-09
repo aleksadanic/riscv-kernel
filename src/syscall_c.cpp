@@ -2,13 +2,14 @@
 #include "../lib/hw.h"
 
 uint64 syscallWrapper (uint64 a0, uint64 a1, uint64 a2, uint64 a3) {
+    uint64 answer;
     asm volatile (
-        "ecall"
-        : [a0] "+r" (a0)
-        : "r" (a1), "r" (a2), "r" (a3)
-        : "memory"
+        "ecall\n"
+        "mv %[answer], a0"
+        : [answer] "=r" (answer)
+        : : "a0", "memory"
     );
-    return a0;
+    return answer;
 }
 
 void* mem_alloc (size_t size) {
