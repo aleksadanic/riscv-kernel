@@ -12,9 +12,9 @@ extern "C" {
         __putc('\n');
         switch (syscallNum) {
             case 0x01:
-                return (uint64) MemoryAllocator::getInstance().alloc((size_t) a1);
+                return (uint64) MemoryAllocator::alloc((size_t) a1);
             case 0x02:
-                return (uint64) MemoryAllocator::getInstance().free((void*) a1);
+                return (uint64) MemoryAllocator::free((void*) a1);
         }
         return (uint64) -1;
     }

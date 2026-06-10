@@ -7,12 +7,10 @@ struct AllocatedSegment {
 
 class MemoryAllocator {
 public:
-    void* alloc (size_t blocks);
-    int free (void* address);
-
-    static MemoryAllocator& getInstance ();
+    static void* alloc (size_t blocks);
+    static int free (void* address);
 
 private:
-    AllocatedSegment* firstAllocatedSegment;
-    MemoryAllocator ();
+    static AllocatedSegment* firstAllocatedSegment;
+    MemoryAllocator() = delete;
 };

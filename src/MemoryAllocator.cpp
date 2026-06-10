@@ -45,11 +45,4 @@ int MemoryAllocator::free (void* address) {
     return -1;
 }
 
-MemoryAllocator& MemoryAllocator::getInstance () {
-    static MemoryAllocator instance;
-    return instance;
-}
-
-MemoryAllocator::MemoryAllocator () {
-    firstAllocatedSegment = (AllocatedSegment*) HEAP_END_ADDR;
-}
+AllocatedSegment* MemoryAllocator::firstAllocatedSegment = (AllocatedSegment*) HEAP_END_ADDR;
