@@ -7,6 +7,9 @@ extern "C" {
     void interruptRoutine ();
 
     uint64 handleInterrupt (uint64 syscallNum, uint64 a1, uint64 a2, uint64 a3) {
+        printString("handleInterrupt\n");
+        printInt(syscallNum);
+        __putc('\n');
         switch (syscallNum) {
             case 0x01:
                 return (uint64) MemoryAllocator::getInstance().alloc((size_t) a1);
@@ -18,9 +21,7 @@ extern "C" {
 }
 
 void main () {
-    __putc('h');
+    printString("main\n");
     asm volatile ("csrw stvec, %[interruptRoutine]" : : [interruptRoutine] "r" (&interruptRoutine));
-    __putc('s');
-    mem_alloc(120);
-    __putc('e');
+    printString("Interrupt routine address initialized!\n");
 }
