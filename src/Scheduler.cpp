@@ -1,5 +1,5 @@
-#include "Scheduler.hpp"
-#include "Thread.hpp"
+#include "../h/Scheduler.hpp"
+#include "../h/Thread.hpp"
 
 void Scheduler::put (Thread* t) {
     if (!t) {
