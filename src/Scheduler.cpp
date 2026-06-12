@@ -1,5 +1,6 @@
 #include "../h/Scheduler.hpp"
 #include "../h/Thread.hpp"
+#include "../h/MemoryAllocator.hpp"
 
 void Scheduler::put (Thread* t) {
     if (!t) {
@@ -16,15 +17,25 @@ void Scheduler::put (Thread* t) {
 }
 
 Thread* Scheduler::get () {
-    Thread* answer = head;
-    if (head) {
-        head = head->next;
-        if (!head) {
-            tail = 0;
+    while (true) {
+        Thread *answer = head;
+        if (head) {
+            head = head->next;
+            if (!head) {
+                tail = 0;
+            }
         }
+        if (answer && answer->getState() == Thread::State::FINISHED) {
+            delete answer;
+            continue;
+        }
+        return answer;
     }
-    return answer;
 }
 
 Thread* Scheduler::head = 0;
 Thread* Scheduler::tail = 0;
+
+void Scheduler::operator delete (void* address) {
+    MemoryAllocator::free (address);
+}

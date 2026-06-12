@@ -12,5 +12,4 @@ public:
 
 private:
     static AllocatedSegment* firstAllocatedSegment;
-    MemoryAllocator() = delete;
 };

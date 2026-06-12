@@ -18,6 +18,8 @@ contextSwitch:
 
     sd sp, 248(a0)
 
+    csrw sscratch, a1
+
     ld sp, 248(a1)
 
     ld ra, 0(sp)
