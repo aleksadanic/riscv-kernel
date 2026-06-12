@@ -49,6 +49,8 @@ interruptRoutine:
 
     csrr tp, sscratch
 
+    sd sp, 248(tp)
+
     ld sp, 0(tp)
     ld ra, 8(tp)
     ld s0, 16(tp)
