@@ -16,6 +16,8 @@ uint64 syscallWrapper (uint64 a0, uint64 a1, uint64 a2, uint64 a3, uint64 a4) {
         : [a1] "r" (a1), [a2] "r" (a2), [a3] "r" (a3), [a4] "r" (a4)
         : "a1", "a2", "a3", "a4", "memory"
     );
+    // printInt(a0);
+    // printString("EVO MEEEEE\n");
     return a0;
 }
 
@@ -30,13 +32,14 @@ int mem_free (void* address) {
     return (int) syscallWrapper (0x02, (uint64) address);
 }
 
-int thread_create (thread_t* handle, void (*start_routine) (void*), void* arg) {
+int thread_create (Thread** handle, void (*start_routine) (void*), void* arg) {
     printString("thread_create\n");
     char* stack = new char[DEFAULT_STACK_SIZE];
+    printString("___________\n");
     if (!stack) {
         return -1;
     }
-    return (int) syscallWrapper (0x11, (uint64) handle, (uint64) start_routine, (uint64) arg, (uint64) stack);
+    return (int) syscallWrapper (0x11, (uint64) handle, (uint64) start_routine, (uint64) arg, (uint64) (stack + DEFAULT_STACK_SIZE));
 }
 
 int thread_exit () {
@@ -47,4 +50,9 @@ int thread_exit () {
 void thread_dispatch () {
     printString("thread_dispatch\n");
     syscallWrapper (0x13);
+}
+
+int thread_adopt (Thread** handle) {
+    printString("main_thread_create\n");
+    return (int) syscallWrapper (0x14);
 }

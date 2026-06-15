@@ -100,7 +100,7 @@ ${DIR_BUILD}/%.o: %.c Makefile | ${DIR_BUILD}
 	@mkdir -p $(dir ${@})
 	${CC} -c ${CFLAGS} -Wa,-a,-ad,-alms=${DIR_BUILD}/${<:.c=.lst} -o ${@} ${<}
 
-${DIR_BUILD}/%.o: %.s Makefile | ${DIR_BUILD}
+${DIR_BUILD}/%.o: %.S Makefile | ${DIR_BUILD}
 	@mkdir -p $(dir ${@})
 	${AS} -c ${ASFLAGS} -o ${@} ${<}
 

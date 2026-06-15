@@ -24,9 +24,12 @@ public:
     static int create (Thread** handle, void (*start_routine) (void*), void* arg, void* stack_space);
     static int exit ();
     static void dispatch ();
+    static int adopt (Thread** handle);
 
     enum class State {
+        RUNNING,
         READY,
+        BLOCKED,
         FINISHED
     };
 
@@ -40,8 +43,8 @@ public:
     ~Thread ();
 
 private:
-    uint64* userStack;
-    uint64* kernelStack;
+    uint64* userStack = 0;
+    uint64* kernelStack = 0;
 
     State state = State::READY;
 

@@ -65,7 +65,6 @@ interruptRoutine:
     ld s9, 88(tp)
     ld s10, 96(tp)
     ld s11, 104(tp)
-    ld a0, 112(tp)
     ld a1, 120(tp)
     ld a2, 128(tp)
     ld a3, 136(tp)

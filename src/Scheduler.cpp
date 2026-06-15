@@ -1,6 +1,7 @@
 #include "../h/Scheduler.hpp"
 #include "../h/Thread.hpp"
 #include "../h/MemoryAllocator.hpp"
+#include "../lib/console.h"
 
 void Scheduler::put (Thread* t) {
     if (!t) {
@@ -26,7 +27,7 @@ Thread* Scheduler::get () {
             }
         }
         if (answer && answer->getState() == Thread::State::FINISHED) {
-            delete answer;
+            MemoryAllocator::free (answer);
             continue;
         }
         return answer;
