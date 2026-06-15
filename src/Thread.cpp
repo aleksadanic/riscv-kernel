@@ -10,6 +10,8 @@ extern "C" {
     void threadStartup ();
 };
 
+void threadWrapper (void (*start_routine) (void*), void* arg);
+
 int Thread::create (Thread** handle, void(*start_routine)(void*), void* arg, void* stack_space) {
     printString ("Thread::create\n");
     if (!start_routine) {
@@ -55,10 +57,14 @@ int Thread::exit () {
     Thread* oldRunning = running;
     Scheduler::put (running);
     running = Scheduler::get ();
-    printInt ((long) oldRunning->context);
-    __putc('\n');
-    printInt ((long) running->context);
-    __putc('\n');
+    if (!running) {
+        asm volatile (
+            "li t0, 0x100000\n"
+            "li t1, 0x5555\n"
+            "sw t1, 0(t0)\n"
+            : : : "t0", "t1", "memory"
+        );
+    }
     running->state = State::RUNNING;
     contextSwitch (oldRunning->context, running->context);
     return 0;
@@ -101,12 +107,6 @@ int Thread::adopt (Thread** handle) {
     running = t;
     *handle = t;
     return 0;
-}
-
-void Thread::threadWrapper (void (*start_routine) (void*), void* arg) {
-    printString ("Thread::threadWrapper\n");
-    start_routine (arg);
-    exit ();
 }
 
 Thread::State Thread::getState () {

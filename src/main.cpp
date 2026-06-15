@@ -8,16 +8,13 @@ extern "C" {
     void interruptRoutine ();
 
     uint64 handleInterrupt (uint64 syscallNum, uint64 a1, uint64 a2, uint64 a3, uint64 a4) {
-        printString("handleInterrupt: ");
+        printString ("handleInterrupt: ");
         printInt(syscallNum);
-        __putc('\n');
+        printString (", ");
         uint64 scause_val;
         asm volatile ("csrr %[scause], scause" : [scause] "=r" (scause_val));
-        
-        // Štampamo uzrok prekida
-        printString("PREKID OKINUT! scause = ");
         printInt(scause_val);
-        printString("\n");
+        printString ("\n");
         switch (syscallNum) {
             case 0x01:
                 return (uint64) MemoryAllocator::alloc ((size_t) a1);
@@ -37,26 +34,35 @@ extern "C" {
     }
 }
 
+void threadWrapper (void (*start_routine) (void*), void* arg) {
+    printString ("threadWrapper\n");
+    start_routine (arg);
+    thread_exit ();
+}
+
 void* operator new (size_t size) {
-    return mem_alloc(size);
+    return mem_alloc (size);
 }
 
 void* operator new[] (size_t size) {
-    printString("i tu sam\n");
-    return mem_alloc(size);
+    return mem_alloc (size);
 }
 
 void operator delete (void* address) {
-    mem_free(address);
+    mem_free (address);
 }
 
 void operator delete[] (void* address) {
-    mem_free(address);
+    mem_free (address);
 }
 
 void userMain (void* ptr) {
-    // asm volatile ("j .");
     printString ("userMain\n");
+    Thread *F, *G, *H;
+    thread_create (&F, &f, nullptr);
+    thread_create (&G, &g, nullptr);
+    thread_create (&H, &h, nullptr);
+    thread_exit ();
 }
 
 void main () {
@@ -70,8 +76,11 @@ void main () {
     }
     printString ("mainThread initialized!\n");
     Thread* userMainThread;
-    thread_create (&userMainThread, &userMain, nullptr);
-    // thread_dispatch ();
+    if (thread_create (&userMainThread, &userMain, nullptr)) {
+        mem_free (mainThread);
+        printString ("FATAL ERROR: userMainThread not initialized\n");
+        return;
+    }
+    printString ("userMainThread created!\n");
     thread_exit ();
-    printString ("not good");
 }

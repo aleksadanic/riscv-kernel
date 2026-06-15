@@ -16,8 +16,6 @@ uint64 syscallWrapper (uint64 a0, uint64 a1, uint64 a2, uint64 a3, uint64 a4) {
         : [a1] "r" (a1), [a2] "r" (a2), [a3] "r" (a3), [a4] "r" (a4)
         : "a1", "a2", "a3", "a4", "memory"
     );
-    // printInt(a0);
-    // printString("EVO MEEEEE\n");
     return a0;
 }
 
@@ -35,7 +33,6 @@ int mem_free (void* address) {
 int thread_create (Thread** handle, void (*start_routine) (void*), void* arg) {
     printString("thread_create\n");
     char* stack = new char[DEFAULT_STACK_SIZE];
-    printString("___________\n");
     if (!stack) {
         return -1;
     }

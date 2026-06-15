@@ -47,6 +47,4 @@ private:
     uint64* kernelStack = 0;
 
     State state = State::READY;
-
-    static void threadWrapper (void (*start_routine) (void*), void* arg);
 };
