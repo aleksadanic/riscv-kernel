@@ -53,3 +53,19 @@ int thread_adopt (Thread** handle) {
     printString("main_thread_create\n");
     return (int) syscallWrapper (0x14);
 }
+
+void* operator new (size_t size) {
+    return mem_alloc (size);
+}
+
+void* operator new[] (size_t size) {
+    return mem_alloc (size);
+}
+
+void operator delete (void* address) {
+    mem_free (address);
+}
+
+void operator delete[] (void* address) {
+    mem_free (address);
+}
