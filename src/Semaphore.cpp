@@ -18,10 +18,12 @@ int Semaphore::open (Semaphore** handle, unsigned init) {
 }
 
 int Semaphore::close (Semaphore* handle) {
+    handle->release ();
     handle->closed = true;
     while (handle->head) {
         Thread* t = handle->get ();
         t->setState (Thread::State::READY);
+        t->semWaitReturnValue = -1;
         Scheduler::put (t);
     }
     if (!handle->blockedCount) {
@@ -48,18 +50,16 @@ int Semaphore::wait (unsigned n) {
     }
     Thread* running = Thread::getRunning ();
     running->semWaitingForCount = n;
+    running->semWaitReturnValue = 0;
     running->setState (Thread::State::BLOCKED);
     put (running);
     blockedCount++;
     Thread::dispatch ();
     blockedCount--;
-    if (closed) {
-        if (!blockedCount) {
-            MemoryAllocator::free (this);
-        }
-        return -1;
+    if (closed && !blockedCount) {
+        MemoryAllocator::free (this);
     }
-    return 0;
+    return running->semWaitReturnValue;
 }
 
 int Semaphore::signal (unsigned n) {

@@ -20,6 +20,7 @@ public:
     Thread* scheduler_next;
     Thread* sem_next;
     int semWaitingForCount;
+    int semWaitReturnValue;
 
     static Thread* getRunning ();
 
