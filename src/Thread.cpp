@@ -48,16 +48,18 @@ int Thread::create (Thread** handle, void(*start_routine)(void*), void* arg, voi
     t->state = Thread::State::READY;
     Scheduler::put (t);
     *handle = t;
+    count++;
     return 0;
 }
 
 int Thread::exit () {
     printString ("Thread::exit\n");
+    count--;
     running->state = State::FINISHED;
     Thread* oldRunning = running;
     Scheduler::put (running);
     running = Scheduler::get ();
-    if (!running) {
+    if (!count) {
         asm volatile (
             "li t0, 0x100000\n"
             "li t1, 0x5555\n"
@@ -72,9 +74,11 @@ int Thread::exit () {
 
 void Thread::dispatch () {
     printString ("Thread::dispatch\n");
-    running->state = State::READY;
+    if (running->getState () == State::RUNNING) {
+        running->state = State::READY;
+        Scheduler::put (running);
+    }
     Thread* oldRunning = running;
-    Scheduler::put (running);
     running = Scheduler::get ();
     running->state = State::RUNNING;
     if (oldRunning != running) {
@@ -106,11 +110,16 @@ int Thread::adopt (Thread** handle) {
     t->state = Thread::State::RUNNING;
     running = t;
     *handle = t;
+    count++;
     return 0;
 }
 
 Thread::State Thread::getState () {
     return state;
+}
+
+void Thread::setState (State state) {
+    this->state = state;
 }
 
 Thread::~Thread () {
@@ -126,6 +135,22 @@ Thread::~Thread () {
 }
 
 Thread* Thread::running = 0;
+
+Thread* Thread::getRunning () {
+    return running;
+}
+
+Thread* Thread::idle = 0;
+
+Thread* Thread::getIdle () {
+    return idle;
+}
+
+void Thread::setIdle (Thread* t) {
+    idle = t;
+}
+
+int Thread::count = -1;
 
 void* Thread::operator new (size_t size) {
     return MemoryAllocator::alloc ((size + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE);

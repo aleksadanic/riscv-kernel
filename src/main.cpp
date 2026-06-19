@@ -1,11 +1,13 @@
 #include "../lib/hw.h"
 #include "../lib/console.h"
 #include "../h/Thread.hpp"
+#include "../h/Scheduler.hpp"
 #include "../h/syscall_c.hpp"
 
 extern "C" void interruptRoutine ();
 
 void userMain (void* arg);
+void idle (void* arg);
 
 void main () {
     printInt ((uint64) &userMain);
@@ -19,9 +21,19 @@ void main () {
         return;
     }
     printString ("mainThread initialized!\n");
+    Thread* idleThread;
+    if (thread_create (&idleThread, &idle, nullptr)) {
+        mem_free (mainThread);
+        printString ("FATAL ERROR: idleThread not initialized\n");
+        return;
+    }
+    printString ("idleThread created!\n");
+    Thread::setIdle (idleThread);
+    Scheduler::get ();
     Thread* userMainThread;
     if (thread_create (&userMainThread, &userMain, nullptr)) {
         mem_free (mainThread);
+        mem_free (idleThread);
         printString ("FATAL ERROR: userMainThread not initialized\n");
         return;
     }

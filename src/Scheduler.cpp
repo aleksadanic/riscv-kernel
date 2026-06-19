@@ -7,13 +7,13 @@ void Scheduler::put (Thread* t) {
     if (!t) {
         return;
     }
-    t->next = 0;
+    t->scheduler_next = 0;
     if (!tail) {
         head = t;
         tail = t;
         return;
     }
-    tail->next = t;
+    tail->scheduler_next = t;
     tail = t;
 }
 
@@ -21,7 +21,7 @@ Thread* Scheduler::get () {
     while (true) {
         Thread *answer = head;
         if (head) {
-            head = head->next;
+            head = head->scheduler_next;
             if (!head) {
                 tail = 0;
             }
@@ -29,6 +29,9 @@ Thread* Scheduler::get () {
         if (answer && answer->getState() == Thread::State::FINISHED) {
             MemoryAllocator::free (answer);
             continue;
+        }
+        if (!answer) {
+            return Thread::getIdle ();
         }
         return answer;
     }

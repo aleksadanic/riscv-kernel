@@ -17,9 +17,14 @@ struct Context {
 class Thread {
 public:
     Context* context;
-    Thread* next;
+    Thread* scheduler_next;
+    Thread* sem_next;
+    int semWaitingForCount;
 
-    static Thread* running;
+    static Thread* getRunning ();
+
+    static Thread* getIdle ();
+    static void setIdle (Thread* t);
 
     static int create (Thread** handle, void (*start_routine) (void*), void* arg, void* stack_space);
     static int exit ();
@@ -34,6 +39,7 @@ public:
     };
 
     State getState ();
+    void setState (State state);
 
     static void* operator new (size_t size);
     static void* operator new[] (size_t size);
@@ -45,6 +51,11 @@ public:
 private:
     uint64* userStack = 0;
     uint64* kernelStack = 0;
+
+    static Thread* running;
+    static Thread* idle;
+
+    static int count;
 
     State state = State::READY;
 };

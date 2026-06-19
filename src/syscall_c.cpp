@@ -49,9 +49,34 @@ void thread_dispatch () {
     syscallWrapper (0x13);
 }
 
-int thread_adopt (Thread** handle) {
-    printString("main_thread_create\n");
-    return (int) syscallWrapper (0x14);
+int sem_open (Semaphore** handle, unsigned init) {
+    printString("sem_open\n");
+    return (int) syscallWrapper (0x21, (uint64) handle, (uint64) init);
+}
+
+int sem_close (Semaphore* handle) {
+    printString("sem_close\n");
+    return (int) syscallWrapper (0x22, (uint64) handle);
+}
+
+int sem_wait (Semaphore* id) {
+    printString("sem_wait\n");
+    return (int) syscallWrapper (0x23, (uint64) id);
+}
+
+int sem_signal (Semaphore* id) {
+    printString("sem_signal\n");
+    return (int) syscallWrapper (0x24, (uint64) id);
+}
+
+int sem_wait_n (Semaphore* id, unsigned n) {
+    printString("sem_wait_n\n");
+    return (int) syscallWrapper (0x25, (uint64) id, (uint64) n);
+}
+
+int sem_signal_n (Semaphore* id, unsigned n) {
+    printString("sem_signal_n\n");
+    return (int) syscallWrapper (0x26, (uint64) id, (uint64) n);
 }
 
 void* operator new (size_t size) {
