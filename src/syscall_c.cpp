@@ -3,7 +3,7 @@
 #include "../lib/console.h"
 
 uint64 syscallWrapper (uint64 a0, uint64 a1, uint64 a2, uint64 a3, uint64 a4) {
-    printString("syscallWrapper\n");
+    // printString("syscallWrapper\n");
     asm volatile (
         "mv a0, %[a0]\n"
         "mv a1, %[a1]\n"
@@ -20,18 +20,18 @@ uint64 syscallWrapper (uint64 a0, uint64 a1, uint64 a2, uint64 a3, uint64 a4) {
 }
 
 void* mem_alloc (size_t size) {
-    printString("mem_alloc\n");
+    // printString("mem_alloc\n");
     size_t blocks = (size + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE;
     return (void*) syscallWrapper (0x01, blocks);
 }
 
 int mem_free (void* address) {
-    printString("mem_free\n");
+    // printString("mem_free\n");
     return (int) syscallWrapper (0x02, (uint64) address);
 }
 
 int thread_create (Thread** handle, void (*start_routine) (void*), void* arg) {
-    printString("thread_create\n");
+    // printString("thread_create\n");
     char* stack = new char[DEFAULT_STACK_SIZE];
     if (!stack) {
         return -1;
@@ -40,43 +40,47 @@ int thread_create (Thread** handle, void (*start_routine) (void*), void* arg) {
 }
 
 int thread_exit () {
-    printString("thread_exit\n");
+    // printString("thread_exit\n");
     return (int) syscallWrapper (0x12);
 }
 
 void thread_dispatch () {
-    printString("thread_dispatch\n");
+    // printString("thread_dispatch\n");
     syscallWrapper (0x13);
 }
 
 int sem_open (Semaphore** handle, unsigned init) {
-    printString("sem_open\n");
+    // printString("sem_open\n");
     return (int) syscallWrapper (0x21, (uint64) handle, (uint64) init);
 }
 
 int sem_close (Semaphore* handle) {
-    printString("sem_close\n");
+    // printString("sem_close\n");
     return (int) syscallWrapper (0x22, (uint64) handle);
 }
 
 int sem_wait (Semaphore* id) {
-    printString("sem_wait\n");
+    // printString("sem_wait\n");
     return (int) syscallWrapper (0x23, (uint64) id);
 }
 
 int sem_signal (Semaphore* id) {
-    printString("sem_signal\n");
+    // printString("sem_signal\n");
     return (int) syscallWrapper (0x24, (uint64) id);
 }
 
 int sem_wait_n (Semaphore* id, unsigned n) {
-    printString("sem_wait_n\n");
+    // printString("sem_wait_n\n");
     return (int) syscallWrapper (0x25, (uint64) id, (uint64) n);
 }
 
 int sem_signal_n (Semaphore* id, unsigned n) {
-    printString("sem_signal_n\n");
+    // printString("sem_signal_n\n");
     return (int) syscallWrapper (0x26, (uint64) id, (uint64) n);
+}
+
+int time_sleep (time_t time) {
+    return (int) syscallWrapper (0x31, (uint64) time);
 }
 
 void* operator new (size_t size) {

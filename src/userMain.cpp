@@ -2,30 +2,30 @@
 #include "../lib/console.h"
 #include "../lib/hw.h"
 
-void worker(void* arg) {
-    int id = (uint64)arg;
-
-    for (int i = 0; i < 20; i++) {
-        printString("T");
-        printInt(id);
-        printString(" i=");
+void A(void*) {
+    for (int i = 0; i < 5; i++) {
+        printString("A ");
         printInt(i);
         printString("\n");
+        time_sleep(3);
+    }
+}
 
-        if (i % 3 == 0) {
-            thread_dispatch();
-        }
-
-        for (volatile int j = 0; j < 10000000; j++);
+void B(void*) {
+    for (int i = 0; i < 10; i++) {
+        printString("B ");
+        printInt(i);
+        printString("\n");
+        thread_dispatch();
     }
 }
 
 void userMain(void*) {
-    Thread* t1;
-    Thread* t2;
+    Thread* a;
+    Thread* b;
 
-    thread_create(&t1, worker, (void*)1);
-    thread_create(&t2, worker, (void*)2);
+    thread_create(&a, A, nullptr);
+    thread_create(&b, B, nullptr);
 
-    for (volatile int i = 0; i < 500000000; i++);
+    for (volatile int i = 0; i < 300000000; i++);
 }

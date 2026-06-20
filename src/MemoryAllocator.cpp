@@ -2,7 +2,7 @@
 #include "../lib/console.h"
 
 void* MemoryAllocator::alloc (size_t blocks) {
-    printString("MemoryAllocator::alloc\n");
+    // printString("MemoryAllocator::alloc\n");
     if (blocks == 0) {
         return 0;
     }

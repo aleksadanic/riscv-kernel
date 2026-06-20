@@ -6,13 +6,13 @@
 
 extern "C" {
     uint64 handleInterrupt (uint64 syscallNum, uint64 a1, uint64 a2, uint64 a3, uint64 a4) {
-        printString ("handleInterrupt: ");
-        printInt(syscallNum);
-        printString (", ");
+        // printString ("handleInterrupt: ");
+        // printInt(syscallNum);
+        // printString (", ");
         uint64 scause;
         asm volatile ("csrr %[scause], scause" : [scause] "=r" (scause));
-        printInt(scause);
-        printString ("\n");
+        // printInt(scause);
+        // printString ("\n");
         if (scause == 0x8000000000000001) {
             asm volatile (
                 "csrr t0, sip\n"
@@ -50,6 +50,8 @@ extern "C" {
                 return (uint64) ((Semaphore*) a1)->wait ((unsigned) a2);
             case 0x26:
                 return (uint64) ((Semaphore*) a1)->signal ((unsigned) a2);
+            case 0x31:
+                return (uint64) Thread::sleep ((time_t) a1);
         }
         return (uint64) -1;
     }

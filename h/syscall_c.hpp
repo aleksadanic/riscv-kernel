@@ -19,3 +19,6 @@ int sem_wait (sem_t id);
 int sem_signal (sem_t id);
 int sem_wait_n (sem_t id, unsigned n);
 int sem_signal_n (sem_t id, unsigned n);
+
+typedef unsigned long time_t;
+int time_sleep (time_t time);

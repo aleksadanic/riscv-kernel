@@ -21,8 +21,10 @@ public:
     Context* context;
     Thread* scheduler_next;
     Thread* sem_next;
+    Thread* sleep_next;
     int semWaitingForCount;
     int semWaitReturnValue;
+    int sleepingMoreFor;
 
     static Thread* getRunning ();
 
@@ -34,6 +36,7 @@ public:
     static void dispatch ();
     static int adopt (Thread** handle);
     static void onTickUpdate ();
+    static int sleep (time_t time);
 
     enum class State {
         RUNNING,
