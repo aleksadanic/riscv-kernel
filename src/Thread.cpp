@@ -4,6 +4,7 @@
 #include "../lib/console.h"
 
 #define KERNEL_STACK_SIZE 4096
+#define TIMER_PERIOD 1000
 
 extern "C" {
     void contextSwitch (Context* c1, Context* c2);
@@ -46,6 +47,8 @@ int Thread::create (Thread** handle, void(*start_routine)(void*), void* arg, voi
     t->kernelStack = kernelStack;
     t->context = context;
     t->state = Thread::State::READY;
+    t->timeRemaining = DEFAULT_TIME_SLICE * 1000;
+    t->timeSlice = DEFAULT_TIME_SLICE * 1000;
     Scheduler::put (t);
     *handle = t;
     count++;
@@ -67,6 +70,7 @@ int Thread::exit () {
             : : : "t0", "t1", "memory"
         );
     }
+    running->timeRemaining = running->timeSlice;
     running->state = State::RUNNING;
     contextSwitch (oldRunning->context, running->context);
     return 0;
@@ -80,6 +84,7 @@ void Thread::dispatch () {
     }
     Thread* oldRunning = running;
     running = Scheduler::get ();
+    running->timeRemaining = running->timeSlice;
     running->state = State::RUNNING;
     if (oldRunning != running) {
         contextSwitch (oldRunning->context, running->context);
@@ -112,6 +117,16 @@ int Thread::adopt (Thread** handle) {
     *handle = t;
     count++;
     return 0;
+}
+
+void Thread::onTickUpdate () {
+    printString ("Thread::onTickUpdate\n");
+    Thread* running = getRunning ();
+    if (running->timeRemaining > TIMER_PERIOD) {
+        running->timeRemaining -= TIMER_PERIOD;
+    } else {
+        dispatch ();
+    }
 }
 
 Thread::State Thread::getState () {

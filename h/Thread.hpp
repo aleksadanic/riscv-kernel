@@ -11,6 +11,8 @@ struct Context {
 
     uint64 kernel_sp;
 
+    uint64 sepc;
+
     Context () { }
 };
 
@@ -31,6 +33,7 @@ public:
     static int exit ();
     static void dispatch ();
     static int adopt (Thread** handle);
+    static void onTickUpdate ();
 
     enum class State {
         RUNNING,
@@ -50,8 +53,11 @@ public:
     ~Thread ();
 
 private:
-    uint64* userStack = 0;
-    uint64* kernelStack = 0;
+    uint64* userStack;
+    uint64* kernelStack;
+
+    time_t timeSlice = DEFAULT_TIME_SLICE * 1000;
+    time_t timeRemaining = DEFAULT_TIME_SLICE * 1000;
 
     static Thread* running;
     static Thread* idle;

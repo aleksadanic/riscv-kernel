@@ -9,10 +9,23 @@ extern "C" {
         printString ("handleInterrupt: ");
         printInt(syscallNum);
         printString (", ");
-        uint64 scause_val;
-        asm volatile ("csrr %[scause], scause" : [scause] "=r" (scause_val));
-        printInt(scause_val);
+        uint64 scause;
+        asm volatile ("csrr %[scause], scause" : [scause] "=r" (scause));
+        printInt(scause);
         printString ("\n");
+        if (scause == 0x8000000000000001) {
+            asm volatile (
+                "csrr t0, sip\n"
+                "li t1, 2\n"
+                "not t1, t1\n"
+                "and t0, t0, t1\n"
+                "csrw sip, t0"
+                : : : "t0", "t1"
+            );
+            Thread::onTickUpdate ();
+            return (uint64) 0;
+        }
+        Thread::getRunning ()->context->sepc += 4;
         switch (syscallNum) {
             case 0x01:
                 return (uint64) MemoryAllocator::alloc ((size_t) a1);

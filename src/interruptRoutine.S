@@ -34,6 +34,9 @@ interruptRoutine:
     sd t6, 224(tp)
     sd gp, 232(tp)
 
+    csrr t0, sepc
+    sd t0, 256(tp)
+
     csrr gp, sscratch
     sd gp, 240(tp)
 
@@ -41,15 +44,14 @@ interruptRoutine:
 
     csrw sscratch, tp
 
-    csrr t0, sepc
-    addi t0, t0, 4
-    csrw sepc, t0
-
     call handleInterrupt
 
     csrr tp, sscratch
 
     sd sp, 248(tp)
+
+    ld t0, 256(tp)
+    csrw sepc, t0
 
     ld sp, 0(tp)
     ld ra, 8(tp)

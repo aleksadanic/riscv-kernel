@@ -10,8 +10,6 @@ void userMain (void* arg);
 void idle (void* arg);
 
 void main () {
-    printInt ((uint64) &userMain);
-    printString("\n");
     printString ("main\n");
     asm volatile ("csrw stvec, %[interruptRoutine]" : : [interruptRoutine] "r" (&interruptRoutine));
     printString ("Interrupt routine address initialized!\n");
@@ -38,5 +36,11 @@ void main () {
         return;
     }
     printString ("userMainThread created!\n");
+    asm volatile (
+        "li t0, 2\n"
+        "csrw sie, t0\n"
+        "csrw sip, zero\n"
+        : : : "t0"
+    );
     thread_exit ();
 }
