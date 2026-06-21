@@ -1,9 +1,9 @@
 #include "../h/Scheduler.hpp"
-#include "../h/Thread.hpp"
+#include "../h/TCB.hpp"
 #include "../h/MemoryAllocator.hpp"
 #include "../lib/console.h"
 
-void Scheduler::put (Thread* t) {
+void Scheduler::put (TCB* t) {
     if (!t) {
         return;
     }
@@ -17,28 +17,28 @@ void Scheduler::put (Thread* t) {
     tail = t;
 }
 
-Thread* Scheduler::get () {
+TCB* Scheduler::get () {
     while (true) {
-        Thread *answer = head;
+        TCB *answer = head;
         if (head) {
             head = head->scheduler_next;
             if (!head) {
                 tail = 0;
             }
         }
-        if (answer && answer->getState() == Thread::State::FINISHED) {
+        if (answer && answer->getState() == TCB::State::FINISHED) {
             MemoryAllocator::free (answer);
             continue;
         }
         if (!answer) {
-            return Thread::getIdle ();
+            return TCB::getIdle ();
         }
         return answer;
     }
 }
 
-Thread* Scheduler::head = 0;
-Thread* Scheduler::tail = 0;
+TCB* Scheduler::head = 0;
+TCB* Scheduler::tail = 0;
 
 void Scheduler::operator delete (void* address) {
     MemoryAllocator::free (address);

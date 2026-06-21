@@ -1,9 +1,9 @@
 #include "../h/SleepQueue.hpp"
-#include "../h/Thread.hpp"
+#include "../h/TCB.hpp"
 #include "../h/Scheduler.hpp"
 
 void SleepQueue::put (time_t time) {
-    Thread* running = Thread::getRunning ();
+    TCB* running = TCB::getRunning ();
     if (!head) {
         head = running;
         running->sleepingMoreFor = time;
@@ -14,7 +14,7 @@ void SleepQueue::put (time_t time) {
         running->sleepingMoreFor = time;
         head = running;
     } else {
-        Thread* curr = head;
+        TCB* curr = head;
         time_t total = 0;
         total = curr->sleepingMoreFor;
         while (curr->sleep_next) {
@@ -31,12 +31,12 @@ void SleepQueue::put (time_t time) {
             running->sleep_next->sleepingMoreFor -= time - total;
         }
     }
-    running->setState (Thread::State::BLOCKED);
-    Thread::dispatch ();
+    running->setState (TCB::State::BLOCKED);
+    TCB::dispatch ();
 }
 
-Thread* SleepQueue::get () {
-    Thread* answer = head;
+TCB* SleepQueue::get () {
+    TCB* answer = head;
     head = head->sleep_next;
     return answer;
 }
@@ -48,10 +48,10 @@ void SleepQueue::forward (time_t time) {
             break;
         }
         time -= head->sleepingMoreFor;
-        Thread* t = get ();
-        t->setState (Thread::State::READY);
+        TCB* t = get ();
+        t->setState (TCB::State::READY);
         Scheduler::put (t);
     }
 }
 
-Thread* SleepQueue::head = 0;
+TCB* SleepQueue::head = 0;

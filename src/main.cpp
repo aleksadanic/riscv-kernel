@@ -1,6 +1,6 @@
 #include "../lib/hw.h"
 #include "../lib/console.h"
-#include "../h/Thread.hpp"
+#include "../h/TCB.hpp"
 #include "../h/Scheduler.hpp"
 #include "../h/syscall_c.hpp"
 
@@ -13,29 +13,29 @@ void main () {
     // printString ("main\n");
     asm volatile ("csrw stvec, %[interruptRoutine]" : : [interruptRoutine] "r" (&interruptRoutine));
     // printString ("Interrupt routine address initialized!\n");
-    Thread* mainThread;
-    if (Thread::adopt (&mainThread)) {
-        // printString ("FATAL ERROR: mainThread not initialized\n");
+    TCB* mainTCB;
+    if (TCB::adopt (&mainTCB)) {
+        // printString ("FATAL ERROR: mainTCB not initialized\n");
         return;
     }
-    // printString ("mainThread initialized!\n");
-    Thread* idleThread;
-    if (thread_create (&idleThread, &idle, nullptr)) {
-        mem_free (mainThread);
-        // printString ("FATAL ERROR: idleThread not initialized\n");
+    // printString ("mainTCB initialized!\n");
+    TCB* idleTCB;
+    if (thread_create (&idleTCB, &idle, nullptr)) {
+        mem_free (mainTCB);
+        // printString ("FATAL ERROR: idleTCB not initialized\n");
         return;
     }
-    // printString ("idleThread created!\n");
-    Thread::setIdle (idleThread);
+    // printString ("idleTCB created!\n");
+    TCB::setIdle (idleTCB);
     Scheduler::get ();
-    Thread* userMainThread;
-    if (thread_create (&userMainThread, &userMain, nullptr)) {
-        mem_free (mainThread);
-        mem_free (idleThread);
-        // printString ("FATAL ERROR: userMainThread not initialized\n");
+    TCB* userMainTCB;
+    if (thread_create (&userMainTCB, &userMain, nullptr)) {
+        mem_free (mainTCB);
+        mem_free (idleTCB);
+        // printString ("FATAL ERROR: userMainTCB not initialized\n");
         return;
     }
-    // printString ("userMainThread created!\n");
+    // printString ("userMainTCB created!\n");
     asm volatile (
         "li t0, 2\n"
         "csrw sie, t0\n"

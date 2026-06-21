@@ -1,10 +1,10 @@
-#include "../h/Semaphore.hpp"
+#include "../h/SCB.hpp"
 #include "../h/MemoryAllocator.hpp"
 #include "../h/Scheduler.hpp"
-#include "../h/Thread.hpp"
+#include "../h/TCB.hpp"
 
-int Semaphore::open (Semaphore** handle, unsigned init) {
-    Semaphore* sem = (Semaphore*) MemoryAllocator::alloc (sizeof (Semaphore));
+int SCB::open (SCB** handle, unsigned init) {
+    SCB* sem = (SCB*) MemoryAllocator::alloc (sizeof (SCB));
     if (!sem) {
         return -1;
     }
@@ -17,12 +17,12 @@ int Semaphore::open (Semaphore** handle, unsigned init) {
     return 0;
 }
 
-int Semaphore::close (Semaphore* handle) {
+int SCB::close (SCB* handle) {
     handle->release ();
     handle->closed = true;
     while (handle->head) {
-        Thread* t = handle->get ();
-        t->setState (Thread::State::READY);
+        TCB* t = handle->get ();
+        t->setState (TCB::State::READY);
         t->semWaitReturnValue = -1;
         Scheduler::put (t);
     }
@@ -32,15 +32,15 @@ int Semaphore::close (Semaphore* handle) {
     return 0;
 }
 
-int Semaphore::wait () {
+int SCB::wait () {
     return wait (1);
 }
 
-int Semaphore::signal () {
+int SCB::signal () {
     return signal (1);
 }
 
-int Semaphore::wait (unsigned n) {
+int SCB::wait (unsigned n) {
     if (closed) {
         return -1;
     }
@@ -48,13 +48,13 @@ int Semaphore::wait (unsigned n) {
         val -= n;
         return 0;
     }
-    Thread* running = Thread::getRunning ();
+    TCB* running = TCB::getRunning ();
     running->semWaitingForCount = n;
     running->semWaitReturnValue = 0;
-    running->setState (Thread::State::BLOCKED);
+    running->setState (TCB::State::BLOCKED);
     put (running);
     blockedCount++;
-    Thread::dispatch ();
+    TCB::dispatch ();
     blockedCount--;
     if (closed && !blockedCount) {
         MemoryAllocator::free (this);
@@ -62,27 +62,27 @@ int Semaphore::wait (unsigned n) {
     return running->semWaitReturnValue;
 }
 
-int Semaphore::signal (unsigned n) {
+int SCB::signal (unsigned n) {
     val += n;
     release ();
     return 0;
 }
 
-void Semaphore::release () {
+void SCB::release () {
     while (head) {
         if (val >= head->semWaitingForCount) {
             val -= head->semWaitingForCount;
-            head->setState (Thread::State::READY);
+            head->setState (TCB::State::READY);
             Scheduler::put (get ());
             continue;
         }
-        Thread* node = head;
+        TCB* node = head;
         bool done = true;
         while (node->sem_next) {
             if (val >= node->sem_next->semWaitingForCount) {
                 val -= node->sem_next->semWaitingForCount;
-                node->sem_next->setState (Thread::State::READY);
-                Thread* t = node->sem_next;
+                node->sem_next->setState (TCB::State::READY);
+                TCB* t = node->sem_next;
                 node->sem_next = node->sem_next->sem_next;
                 if (tail == t) {
                     tail = node;
@@ -99,7 +99,7 @@ void Semaphore::release () {
     }
 }
 
-void Semaphore::put (Thread* t) {
+void SCB::put (TCB* t) {
     t->sem_next = 0;
     if (!tail) {
         head = t;
@@ -110,8 +110,8 @@ void Semaphore::put (Thread* t) {
     tail = t;
 }
 
-Thread* Semaphore::get () {
-    Thread* answer = head;
+TCB* SCB::get () {
+    TCB* answer = head;
     head = head->sem_next;
     if (!head) {
         tail = 0;

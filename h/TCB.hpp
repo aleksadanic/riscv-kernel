@@ -16,25 +16,25 @@ struct Context {
     Context () { }
 };
 
-class Thread {
+class TCB {
 public:
     Context* context;
-    Thread* scheduler_next;
-    Thread* sem_next;
-    Thread* sleep_next;
+    TCB* scheduler_next;
+    TCB* sem_next;
+    TCB* sleep_next;
     int semWaitingForCount;
     int semWaitReturnValue;
     int sleepingMoreFor;
 
-    static Thread* getRunning ();
+    static TCB* getRunning ();
 
-    static Thread* getIdle ();
-    static void setIdle (Thread* t);
+    static TCB* getIdle ();
+    static void setIdle (TCB* t);
 
-    static int create (Thread** handle, void (*start_routine) (void*), void* arg, void* stack_space);
+    static int create (TCB** handle, void (*start_routine) (void*), void* arg, void* stack_space);
     static int exit ();
     static void dispatch ();
-    static int adopt (Thread** handle);
+    static int adopt (TCB** handle);
     static void onTickUpdate ();
     static int sleep (time_t time);
 
@@ -53,7 +53,7 @@ public:
     static void operator delete (void* address);
     static void operator delete[] (void* address);
 
-    ~Thread ();
+    ~TCB ();
 
 private:
     uint64* userStack;
@@ -62,8 +62,8 @@ private:
     time_t timeSlice = DEFAULT_TIME_SLICE * 1000;
     time_t timeRemaining = DEFAULT_TIME_SLICE * 1000;
 
-    static Thread* running;
-    static Thread* idle;
+    static TCB* running;
+    static TCB* idle;
 
     static int count;
 

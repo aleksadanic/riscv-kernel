@@ -1,12 +1,12 @@
-class Thread;
+class TCB;
 
 class Scheduler {
 public:
-    static void put (Thread* t);
-    static Thread* get ();
+    static void put (TCB* t);
+    static TCB* get ();
 
     static void operator delete (void* address);
 
 private:
-    static Thread *head, *tail;
+    static TCB *head, *tail;
 };

@@ -30,9 +30,9 @@ int mem_free (void* address) {
     return (int) syscallWrapper (0x02, (uint64) address);
 }
 
-int thread_create (Thread** handle, void (*start_routine) (void*), void* arg) {
+int thread_create (TCB** handle, void (*start_routine) (void*), void* arg) {
     // printString("thread_create\n");
-    char* stack = new char[DEFAULT_STACK_SIZE];
+    char* stack = (char*) mem_alloc (DEFAULT_STACK_SIZE);
     if (!stack) {
         return -1;
     }
@@ -49,52 +49,36 @@ void thread_dispatch () {
     syscallWrapper (0x13);
 }
 
-int sem_open (Semaphore** handle, unsigned init) {
+int sem_open (SCB** handle, unsigned init) {
     // printString("sem_open\n");
     return (int) syscallWrapper (0x21, (uint64) handle, (uint64) init);
 }
 
-int sem_close (Semaphore* handle) {
+int sem_close (SCB* handle) {
     // printString("sem_close\n");
     return (int) syscallWrapper (0x22, (uint64) handle);
 }
 
-int sem_wait (Semaphore* id) {
+int sem_wait (SCB* id) {
     // printString("sem_wait\n");
     return (int) syscallWrapper (0x23, (uint64) id);
 }
 
-int sem_signal (Semaphore* id) {
+int sem_signal (SCB* id) {
     // printString("sem_signal\n");
     return (int) syscallWrapper (0x24, (uint64) id);
 }
 
-int sem_wait_n (Semaphore* id, unsigned n) {
+int sem_wait_n (SCB* id, unsigned n) {
     // printString("sem_wait_n\n");
     return (int) syscallWrapper (0x25, (uint64) id, (uint64) n);
 }
 
-int sem_signal_n (Semaphore* id, unsigned n) {
+int sem_signal_n (SCB* id, unsigned n) {
     // printString("sem_signal_n\n");
     return (int) syscallWrapper (0x26, (uint64) id, (uint64) n);
 }
 
 int time_sleep (time_t time) {
     return (int) syscallWrapper (0x31, (uint64) time);
-}
-
-void* operator new (size_t size) {
-    return mem_alloc (size);
-}
-
-void* operator new[] (size_t size) {
-    return mem_alloc (size);
-}
-
-void operator delete (void* address) {
-    mem_free (address);
-}
-
-void operator delete[] (void* address) {
-    mem_free (address);
 }
