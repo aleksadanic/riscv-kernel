@@ -29,3 +29,17 @@ void PeriodicThread::run () {
         time_sleep (period);
     }
 }
+
+class Console {
+public:
+    static char getc ();
+    static void putc (char);
+};
+
+char Console::getc () {
+    getc ();
+}
+
+void Console::putc (char c) {
+    putc (c);
+}

@@ -22,3 +22,7 @@ int sem_signal_n (sem_t id, unsigned n);
 
 typedef unsigned long time_t;
 int time_sleep (time_t time);
+
+const int EOF = -1;
+char getc ();
+void putc (char); 

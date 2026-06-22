@@ -82,3 +82,11 @@ int sem_signal_n (SCB* id, unsigned n) {
 int time_sleep (time_t time) {
     return (int) syscallWrapper (0x31, (uint64) time);
 }
+
+char getc () {
+    return (char) syscallWrapper (0x41);
+}
+
+void putc (char c) {
+    syscallWrapper (0x42, (uint64) c);
+}

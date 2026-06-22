@@ -47,8 +47,6 @@ int TCB::create (TCB** handle, void(*start_routine)(void*), void* arg, void* sta
     t->kernelStack = kernelStack;
     t->context = context;
     t->state = TCB::State::READY;
-    t->timeRemaining = DEFAULT_TIME_SLICE;
-    t->timeSlice = DEFAULT_TIME_SLICE;
     Scheduler::put (t);
     *handle = t;
     count++;
@@ -156,6 +154,9 @@ TCB::~TCB () {
         MemoryAllocator::free (context);
     }
 }
+
+time_t TCB::timeRemaining = DEFAULT_TIME_SLICE;
+time_t TCB::timeSlice = DEFAULT_TIME_SLICE;
 
 TCB* TCB::running = 0;
 

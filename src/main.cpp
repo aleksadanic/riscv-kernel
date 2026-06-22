@@ -1,6 +1,7 @@
 #include "../lib/hw.h"
 #include "../lib/console.h"
 #include "../h/TCB.hpp"
+#include "../h/CCB.hpp"
 #include "../h/Scheduler.hpp"
 #include "../h/syscall_c.hpp"
 
@@ -28,10 +29,17 @@ void main () {
     // printString ("idleTCB created!\n");
     TCB::setIdle (idleTCB);
     Scheduler::get ();
+    TCB* printerTCB;
+    if (thread_create (&printerTCB, &CCB::printer, nullptr)) {
+        mem_free (mainTCB);
+        mem_free (idleTCB);
+        return;
+    }
     TCB* userMainTCB;
     if (thread_create (&userMainTCB, &userMain, nullptr)) {
         mem_free (mainTCB);
         mem_free (idleTCB);
+        mem_free (printerTCB);
         // printString ("FATAL ERROR: userMainTCB not initialized\n");
         return;
     }

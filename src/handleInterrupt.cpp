@@ -3,6 +3,7 @@
 #include "../h/MemoryAllocator.hpp"
 #include "../h/TCB.hpp"
 #include "../h/SCB.hpp"
+#include "../h/CCB.hpp"
 
 extern "C" {
     uint64 handleInterrupt (uint64 syscallNum, uint64 a1, uint64 a2, uint64 a3, uint64 a4) {
@@ -23,6 +24,14 @@ extern "C" {
                 : : : "t0", "t1"
             );
             TCB::onTickUpdate ();
+            return (uint64) 0;
+        }
+        if (scause == 0x8000000000000009) {
+            int irq = plic_claim();
+            if (irq == CONSOLE_IRQ) {
+                CCB::handleInterrupt();
+            }
+            plic_complete(irq);
             return (uint64) 0;
         }
         TCB::getRunning ()->context->sepc += 4;
@@ -52,6 +61,11 @@ extern "C" {
                 return (uint64) ((SCB*) a1)->signal ((unsigned) a2);
             case 0x31:
                 return (uint64) TCB::sleep ((time_t) a1);
+            case 0x41:
+                return (uint64) CCB::getc ();
+            case 0x42:
+                CCB::putc ((char) a1);
+                return (uint64) 0;
         }
         return (uint64) -1;
     }

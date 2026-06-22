@@ -59,8 +59,8 @@ private:
     uint64* userStack;
     uint64* kernelStack;
 
-    time_t timeSlice = DEFAULT_TIME_SLICE * 1000;
-    time_t timeRemaining = DEFAULT_TIME_SLICE * 1000;
+    static time_t timeSlice;
+    static time_t timeRemaining;
 
     static TCB* running;
     static TCB* idle;
