@@ -3,6 +3,8 @@
 #include "../h/TCB.hpp"
 #include "../lib/hw.h"
 
+#include "../lib/console.h"
+
 char CCB::getc () {
     if (inputData->wait () < 0) {
         return -1;
@@ -46,3 +48,6 @@ void CCB::init () {
 SCB* CCB::outputData = 0;
 SCB* CCB::outputSpace = 0;
 SCB* CCB::inputData = 0;
+
+Buffer CCB::inputBuffer;
+Buffer CCB::outputBuffer;

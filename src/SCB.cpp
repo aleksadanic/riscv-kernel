@@ -2,6 +2,7 @@
 #include "../h/MemoryAllocator.hpp"
 #include "../h/Scheduler.hpp"
 #include "../h/TCB.hpp"
+#include "../lib/console.h"
 
 int SCB::open (SCB** handle, unsigned init) {
     SCB* sem = (SCB*) MemoryAllocator::alloc (sizeof (SCB));

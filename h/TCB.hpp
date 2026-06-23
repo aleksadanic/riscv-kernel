@@ -12,6 +12,8 @@ struct Context {
     uint64 kernel_sp;
 
     uint64 sepc;
+    uint64 sstatus;
+    uint64 scause;
 
     Context () { }
 };

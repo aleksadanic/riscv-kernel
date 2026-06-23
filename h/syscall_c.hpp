@@ -25,4 +25,4 @@ int time_sleep (time_t time);
 
 const int EOF = -1;
 char getc ();
-void putc (char); 
+void putc (char);

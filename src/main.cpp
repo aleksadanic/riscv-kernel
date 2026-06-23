@@ -35,6 +35,7 @@ void main () {
         mem_free (idleTCB);
         return;
     }
+    printerTCB->context->sstatus = 256;
     TCB* userMainTCB;
     if (thread_create (&userMainTCB, &userMain, nullptr)) {
         mem_free (mainTCB);
@@ -44,8 +45,9 @@ void main () {
         return;
     }
     // printString ("userMainTCB created!\n");
+    CCB::init ();
     asm volatile (
-        "li t0, 2\n"
+        "li t0, 514\n"
         "csrw sie, t0\n"
         "csrw sip, zero\n"
         : : : "t0"

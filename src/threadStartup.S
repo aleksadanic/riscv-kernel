@@ -39,16 +39,4 @@ threadStartup:
 
     csrw sepc, ra
 
-    csrr t0, sstatus
-
-    li t1, 32
-    not t1, t1
-    and t0, t0, t1
-
-    li t1, 256
-    not t1, t1
-    and t0, t0, t1
-    
-    csrw sstatus, t0
-
     sret

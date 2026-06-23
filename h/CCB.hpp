@@ -1,3 +1,5 @@
+class SCB;
+
 struct Buffer {
     static const int N = 256;
 
@@ -36,7 +38,7 @@ private:
     static Buffer inputBuffer;
     static Buffer outputBuffer;
 
-    static SCB *outputData;
-    static SCB *outputSpace;
-    static SCB *inputData;
+    static SCB* outputData;
+    static SCB* outputSpace;
+    static SCB* inputData;
 };

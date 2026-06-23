@@ -42,6 +42,7 @@ int TCB::create (TCB** handle, void(*start_routine)(void*), void* arg, void* sta
     context->a[0] = (uint64) start_routine;
     context->a[1] = (uint64) arg;
     context->kernel_sp = ((uint64) (kernelStack + KERNEL_STACK_SIZE) + 15) / 16 * 16 - 112;
+    context->sstatus = 0;
     *((uint64*) context->kernel_sp) = (uint64) &threadStartup;
     t->userStack = userStack;
     t->kernelStack = kernelStack;
