@@ -6,6 +6,8 @@
 
 #define KERNEL_STACK_SIZE 4096
 
+void exitProgram ();
+
 extern "C" {
     void contextSwitch (Context* c1, Context* c2);
     void threadStartup ();
@@ -41,7 +43,7 @@ int TCB::create (TCB** handle, void(*start_routine)(void*), void* arg, void* sta
     context->ra = (uint64) &threadWrapper;
     context->a[0] = (uint64) start_routine;
     context->a[1] = (uint64) arg;
-    context->kernel_sp = ((uint64) (kernelStack + KERNEL_STACK_SIZE) + 15) / 16 * 16 - 112;
+    context->kernel_sp = ((uint64) ((char*) kernelStack + KERNEL_STACK_SIZE) + 15) / 16 * 16 - 112;
     context->sstatus = 0;
     *((uint64*) context->kernel_sp) = (uint64) &threadStartup;
     t->userStack = userStack;
@@ -62,12 +64,7 @@ int TCB::exit () {
     Scheduler::put (running);
     running = Scheduler::get ();
     if (!count) {
-        asm volatile (
-            "li t0, 0x100000\n"
-            "li t1, 0x5555\n"
-            "sw t1, 0(t0)\n"
-            : : : "t0", "t1", "memory"
-        );
+        exitProgram ();
     }
     running->timeRemaining = running->timeSlice;
     running->state = State::RUNNING;
@@ -79,7 +76,9 @@ void TCB::dispatch () {
     // printString ("TCB::dispatch\n");
     if (running->getState () == State::RUNNING) {
         running->state = State::READY;
-        Scheduler::put (running);
+        if (running != idle) {
+            Scheduler::put (running);
+        }
     }
     TCB* oldRunning = running;
     running = Scheduler::get ();

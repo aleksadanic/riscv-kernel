@@ -5,15 +5,21 @@
 #include "../h/SCB.hpp"
 #include "../h/CCB.hpp"
 
+void exitProgram ();
+
 extern "C" {
     uint64 handleInterrupt (uint64 syscallNum, uint64 a1, uint64 a2, uint64 a3, uint64 a4) {
-        // printString ("handleInterrupt: ");
-        // printInt(syscallNum);
-        // printString (", ");
         uint64 scause;
         asm volatile ("csrr %[scause], scause" : [scause] "=r" (scause));
-        // printInt(scause);
-        // printString ("\n");
+        // PrintString ("handleInterrupt: ");
+        // PrintInt(syscallNum);
+        // PrintString (", ");
+        // PrintInt(scause);
+        // PrintString ("\n");
+        if (scause == 2) {
+            PrintString ("FATAL ERROR: Illegal Instruction\n");
+            exitProgram ();
+        }
         if (scause == 0x8000000000000001) {
             asm volatile (
                 "csrr t0, sip\n"

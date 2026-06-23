@@ -1,12 +1,12 @@
 #include "../lib/console.h"
 
-void printString(const char* s) {
+void PrintString(const char* s) {
     while (*s) {
         __putc(*s++);
     }
 }
 
-void printInt(long x) {
+void PrintInt(long x) {
     if (x == 0) {
         __putc('0');
         return;

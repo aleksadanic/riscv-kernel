@@ -10,9 +10,9 @@ extern "C" {
 
     void console_handler();
 
-    void printString(const char* s);
+    void PrintString(const char* s);
 
-    void printInt(long n);
+    void PrintInt(long n);
 
 #ifdef __cplusplus
 }

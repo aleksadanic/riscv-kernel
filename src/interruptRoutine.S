@@ -1,3 +1,4 @@
+.align 2
 .global interruptRoutine
 .type interruptRoutine, @function
 interruptRoutine:
