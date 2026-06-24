@@ -44,4 +44,8 @@ int MemoryAllocator::free (void* address) {
     return -1;
 }
 
-AllocatedSegment* MemoryAllocator::firstAllocatedSegment = (AllocatedSegment*) HEAP_END_ADDR;
+void MemoryAllocator::init () {
+    firstAllocatedSegment = (AllocatedSegment*) HEAP_END_ADDR;
+}
+
+AllocatedSegment* MemoryAllocator::firstAllocatedSegment = 0;

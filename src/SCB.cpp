@@ -18,6 +18,9 @@ int SCB::open (SCB** handle, unsigned init) {
 }
 
 int SCB::close (SCB* handle) {
+    if (!handle) {
+        return -2;
+    }
     handle->release ();
     handle->closed = true;
     while (handle->head) {

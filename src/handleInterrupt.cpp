@@ -10,7 +10,7 @@ extern "C" {
     uint64 handleInterrupt (uint64 syscallNum, uint64 a1, uint64 a2, uint64 a3, uint64 a4) {
         uint64 scause;
         asm volatile ("csrr %[scause], scause" : [scause] "=r" (scause));
-        if (scause == 2) {
+        if (scause == 2 || scause == 5 || scause == 7) {
             exitProgram ();
         }
         if (scause == 0x8000000000000001) {

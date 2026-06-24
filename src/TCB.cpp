@@ -16,10 +16,11 @@ extern "C" {
 void threadWrapper (void (*start_routine) (void*), void* arg);
 
 int TCB::create (TCB** handle, void(*start_routine)(void*), void* arg, void* stack_space) {
+    uint64* userStack = (uint64*) ((char*) stack_space - DEFAULT_STACK_SIZE);
     if (!start_routine) {
+        MemoryAllocator::free (userStack);
         return -2;
     }
-    uint64* userStack = (uint64*) ((char*) stack_space - DEFAULT_STACK_SIZE);
     uint64* kernelStack = (uint64*) MemoryAllocator::alloc ((KERNEL_STACK_SIZE + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE);
     Context* context = new Context ();
     TCB* t = new TCB ();
@@ -39,7 +40,7 @@ int TCB::create (TCB** handle, void(*start_routine)(void*), void* arg, void* sta
         return -1;
     }
     context->sp = (uint64) stack_space;
-    context->ra = (uint64) &threadWrapper;
+    context->sepc = (uint64) &threadWrapper;
     context->a[0] = (uint64) start_routine;
     context->a[1] = (uint64) arg;
     context->kernel_sp = ((uint64) ((char*) kernelStack + KERNEL_STACK_SIZE) + 15) / 16 * 16 - 112;
@@ -105,7 +106,7 @@ int TCB::adopt (TCB** handle) {
         }
         return -1;
     }
-    context->kernel_sp = ((uint64) (kernelStack + KERNEL_STACK_SIZE) + 15) / 16 * 16 - 112;
+    context->kernel_sp = ((uint64) ((char*) kernelStack + KERNEL_STACK_SIZE) + 15) / 16 * 16 - 112;
     t->kernelStack = kernelStack;
     asm volatile ("csrw sscratch, %[context]" : : [context] "r" (context));
     t->context = context;

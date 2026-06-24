@@ -10,7 +10,7 @@ int mem_free (void* address) {
     return (int) syscallWrapper (0x02, (uint64) address);
 }
 
-int thread_create (TCB** handle, void (*start_routine) (void*), void* arg) {
+int thread_create (thread_t* handle, void (*start_routine) (void*), void* arg) {
     char* stack = (char*) mem_alloc (DEFAULT_STACK_SIZE);
     if (!stack) {
         return -1;
@@ -26,27 +26,27 @@ void thread_dispatch () {
     syscallWrapper (0x13);
 }
 
-int sem_open (SCB** handle, unsigned init) {
+int sem_open (sem_t* handle, unsigned init) {
     return (int) syscallWrapper (0x21, (uint64) handle, (uint64) init);
 }
 
-int sem_close (SCB* handle) {
+int sem_close (sem_t handle) {
     return (int) syscallWrapper (0x22, (uint64) handle);
 }
 
-int sem_wait (SCB* id) {
+int sem_wait (sem_t id) {
     return (int) syscallWrapper (0x23, (uint64) id);
 }
 
-int sem_signal (SCB* id) {
+int sem_signal (sem_t id) {
     return (int) syscallWrapper (0x24, (uint64) id);
 }
 
-int sem_wait_n (SCB* id, unsigned n) {
+int sem_wait_n (sem_t id, unsigned n) {
     return (int) syscallWrapper (0x25, (uint64) id, (uint64) n);
 }
 
-int sem_signal_n (SCB* id, unsigned n) {
+int sem_signal_n (sem_t id, unsigned n) {
     return (int) syscallWrapper (0x26, (uint64) id, (uint64) n);
 }
 

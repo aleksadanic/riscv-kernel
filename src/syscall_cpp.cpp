@@ -22,11 +22,12 @@ int Semaphore::wait () { return sem_wait (myHandle); }
 int Semaphore::signal () { return sem_signal (myHandle); }
 
 void PeriodicThread::terminate () { period = 0; }
-PeriodicThread::PeriodicThread (time_t period) : period (period) { }
-void PeriodicThread::run () {
-    while (period) {
-        periodicActivation ();
-        time_sleep (period);
+PeriodicThread::PeriodicThread (time_t period) : Thread (&periodicRunWrapper, this), period (period) { }
+void PeriodicThread::periodicRunWrapper (void* arg) {
+    PeriodicThread* pt = ((PeriodicThread*) arg);
+    while (pt->period) {
+        pt->periodicActivation ();
+        time_sleep (pt->period);
     }
 }
 

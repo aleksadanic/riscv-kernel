@@ -9,6 +9,7 @@ class MemoryAllocator {
 public:
     static void* alloc (size_t blocks);
     static int free (void* address);
+    static void init ();
 
 private:
     static AllocatedSegment* firstAllocatedSegment;

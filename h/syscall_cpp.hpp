@@ -17,7 +17,7 @@ public:
 protected:
     Thread ();
     virtual void run () { }
-
+    
 private:
     thread_t myHandle;
     void (*body)(void*); void* arg;
@@ -45,7 +45,7 @@ protected:
 
 private:
     time_t period;
-    void run () override;
+    static void periodicRunWrapper (void*);
 };
 
 class Console {

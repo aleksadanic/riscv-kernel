@@ -1,4 +1,5 @@
 #include "../lib/hw.h"
+#include "../h/MemoryAllocator.hpp"
 #include "../h/TCB.hpp"
 #include "../h/CCB.hpp"
 #include "../h/Scheduler.hpp"
@@ -6,31 +7,36 @@
 
 extern "C" void interruptRoutine ();
 
-void userMain (void* arg);
+void userMain ();
 void idle (void* arg);
+
+void userMainWrapper (void*) {
+    userMain ();
+}
 
 void main () {
     asm volatile ("csrw stvec, %[interruptRoutine]" : : [interruptRoutine] "r" (&interruptRoutine));
+    MemoryAllocator::init ();
     TCB* mainTCB;
     if (TCB::adopt (&mainTCB)) {
         return;
     }
-    TCB* idleTCB;
+    thread_t idleTCB;
     if (thread_create (&idleTCB, &idle, nullptr)) {
         mem_free (mainTCB);
         return;
     }
-    TCB::setIdle (idleTCB);
+    TCB::setIdle ((TCB*) idleTCB);
     Scheduler::get ();
-    TCB* printerTCB;
+    thread_t printerTCB;
     if (thread_create (&printerTCB, &CCB::printer, nullptr)) {
         mem_free (mainTCB);
         mem_free (idleTCB);
         return;
     }
-    printerTCB->context->sstatus = 256;
-    TCB* userMainTCB;
-    if (thread_create (&userMainTCB, &userMain, nullptr)) {
+    ((TCB*) printerTCB)->context->sstatus = 256;
+    thread_t userMainTCB;
+    if (thread_create (&userMainTCB, &userMainWrapper, nullptr)) {
         mem_free (mainTCB);
         mem_free (idleTCB);
         mem_free (printerTCB);

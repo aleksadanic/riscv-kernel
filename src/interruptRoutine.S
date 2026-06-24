@@ -52,8 +52,6 @@ interruptRoutine:
 
     csrw sscratch, t0
 
-    li tp, 0
-
     call handleInterrupt
 
     csrr t0, sscratch
@@ -106,8 +104,6 @@ continue:
     ld t4, 208(t0)
     ld t5, 216(t0)
     ld t6, 224(t0)
-    ld gp, 232(t0)
-    ld tp, 240(t0)
 
     ld t0, 176(t0)
 
