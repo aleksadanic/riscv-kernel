@@ -1,7 +1,6 @@
 #include "../h/Scheduler.hpp"
 #include "../h/TCB.hpp"
 #include "../h/MemoryAllocator.hpp"
-#include "../lib/console.h"
 
 void Scheduler::put (TCB* t) {
     if (!t) {
@@ -27,7 +26,7 @@ TCB* Scheduler::get () {
             }
         }
         if (answer && answer->getState() == TCB::State::FINISHED) {
-            MemoryAllocator::free (answer);
+            delete answer;
             continue;
         }
         if (!answer) {
@@ -39,7 +38,3 @@ TCB* Scheduler::get () {
 
 TCB* Scheduler::head = 0;
 TCB* Scheduler::tail = 0;
-
-void Scheduler::operator delete (void* address) {
-    MemoryAllocator::free (address);
-}

@@ -1,15 +1,14 @@
 #include "../h/MemoryAllocator.hpp"
-#include "../lib/console.h"
 
 void* MemoryAllocator::alloc (size_t blocks) {
-    // printString("MemoryAllocator::alloc\n");
     if (blocks == 0) {
         return 0;
     }
+    void* heapStartAddr = (void*) ((((uint64) HEAP_START_ADDR) + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE * MEM_BLOCK_SIZE);
     size_t size = blocks * MEM_BLOCK_SIZE;
     AllocatedSegment *curr = 0, *next = firstAllocatedSegment;
-    if (size + MEM_BLOCK_SIZE <= (size_t) ((char*) next - (char*) HEAP_START_ADDR)) {
-        firstAllocatedSegment = (AllocatedSegment*) HEAP_START_ADDR;
+    if (size + MEM_BLOCK_SIZE <= (size_t) ((char*) next - (char*) heapStartAddr)) {
+        firstAllocatedSegment = (AllocatedSegment*) heapStartAddr;
         firstAllocatedSegment->size = size + MEM_BLOCK_SIZE;
         firstAllocatedSegment->next = next;
         return (void*) ((char*) firstAllocatedSegment + MEM_BLOCK_SIZE);

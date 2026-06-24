@@ -2,10 +2,9 @@
 #include "../h/MemoryAllocator.hpp"
 #include "../h/Scheduler.hpp"
 #include "../h/TCB.hpp"
-#include "../lib/console.h"
 
 int SCB::open (SCB** handle, unsigned init) {
-    SCB* sem = (SCB*) MemoryAllocator::alloc (sizeof (SCB));
+    SCB* sem = new SCB ();
     if (!sem) {
         return -1;
     }
@@ -28,7 +27,7 @@ int SCB::close (SCB* handle) {
         Scheduler::put (t);
     }
     if (!handle->blockedCount) {
-        return MemoryAllocator::free (handle);
+        delete handle;
     }
     return 0;
 }
@@ -58,7 +57,7 @@ int SCB::wait (unsigned n) {
     TCB::dispatch ();
     blockedCount--;
     if (closed && !blockedCount) {
-        MemoryAllocator::free (this);
+        delete this;
     }
     return running->semWaitReturnValue;
 }
@@ -118,4 +117,12 @@ TCB* SCB::get () {
         tail = 0;
     }
     return answer;
+}
+
+void* SCB::operator new (size_t size) {
+    return MemoryAllocator::alloc ((size + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE);
+}
+
+void SCB::operator delete (void* address) {
+    MemoryAllocator::free (address);
 }

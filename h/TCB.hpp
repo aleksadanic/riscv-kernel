@@ -16,6 +16,9 @@ struct Context {
     uint64 scause;
 
     Context () { }
+
+    static void* operator new (size_t size);
+    static void operator delete (void* address);
 };
 
 class TCB {
@@ -51,9 +54,7 @@ public:
     void setState (State state);
 
     static void* operator new (size_t size);
-    static void* operator new[] (size_t size);
     static void operator delete (void* address);
-    static void operator delete[] (void* address);
 
     ~TCB ();
 

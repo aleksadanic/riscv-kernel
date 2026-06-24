@@ -1,3 +1,5 @@
+#include "../lib/hw.h"
+
 class TCB;
 
 class SCB {
@@ -10,6 +12,9 @@ public:
 
     int wait (unsigned n);
     int signal (unsigned n);
+
+    static void* operator new (size_t size);
+    static void operator delete (void* address);
 
 private:
     int val;

@@ -3,8 +3,6 @@
 #include "../h/TCB.hpp"
 #include "../lib/hw.h"
 
-#include "../lib/console.h"
-
 char CCB::getc () {
     if (inputData->wait () < 0) {
         return -1;
@@ -19,8 +17,8 @@ void CCB::putc (char c) {
 }
 
 void CCB::handleInterrupt () {
-    while (*((volatile char*) CONSOLE_STATUS) & CONSOLE_RX_STATUS_BIT) {
-        char c = *((volatile char*) CONSOLE_RX_DATA);
+    while (*((char*) CONSOLE_STATUS) & CONSOLE_RX_STATUS_BIT) {
+        char c = *((char*) CONSOLE_RX_DATA);
         if (!inputBuffer.put (c)) {
             inputData->signal();
         }
@@ -32,16 +30,20 @@ void CCB::printer (void*) {
         outputData->wait ();
         char c = outputBuffer.get ();
         outputSpace->signal ();
-        while (!(*((volatile char*) CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT)) {
+        while (!(*((char*) CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT)) {
             TCB::dispatch ();
         }
-        *((volatile char*) CONSOLE_TX_DATA) = c;
+        *((char*) CONSOLE_TX_DATA) = c;
     }
+}
+
+bool CCB::outputBufferEmpty () {
+    return outputBuffer.empty ();
 }
 
 void CCB::init () {
     SCB::open (&outputData, 0);
-    SCB::open (&outputSpace, Buffer::N);
+    SCB::open (&outputSpace, BoundedBuffer::N);
     SCB::open (&inputData, 0);
 }
 
@@ -49,5 +51,26 @@ SCB* CCB::outputData = 0;
 SCB* CCB::outputSpace = 0;
 SCB* CCB::inputData = 0;
 
-Buffer CCB::inputBuffer;
-Buffer CCB::outputBuffer;
+BoundedBuffer CCB::inputBuffer;
+BoundedBuffer CCB::outputBuffer;
+
+int BoundedBuffer::put (char c) {
+    if (size == N) {
+        return -1;
+    }
+    buffer[tail] = c;
+    tail = (tail + 1) % N;
+    size++;
+    return 0;
+}
+
+char BoundedBuffer::get () {
+    char c = buffer[head];
+    head = (head + 1) % N;
+    size--;
+    return c;
+}
+
+bool BoundedBuffer::empty () {
+    return size == 0;
+}

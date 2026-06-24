@@ -1,8 +1,8 @@
 #include "../h/TCB.hpp"
+#include "../h/CCB.hpp"
 #include "../h/MemoryAllocator.hpp"
 #include "../h/Scheduler.hpp"
 #include "../h/SleepQueue.hpp"
-#include "../lib/console.h"
 
 #define KERNEL_STACK_SIZE 4096
 
@@ -16,14 +16,13 @@ extern "C" {
 void threadWrapper (void (*start_routine) (void*), void* arg);
 
 int TCB::create (TCB** handle, void(*start_routine)(void*), void* arg, void* stack_space) {
-    // printString ("TCB::create\n");
     if (!start_routine) {
         return -2;
     }
     uint64* userStack = (uint64*) ((char*) stack_space - DEFAULT_STACK_SIZE);
-    uint64* kernelStack = (uint64*) MemoryAllocator::alloc (KERNEL_STACK_SIZE);
-    Context* context = (Context*) MemoryAllocator::alloc (sizeof (Context));
-    TCB* t = (TCB*) MemoryAllocator::alloc (sizeof (TCB));
+    uint64* kernelStack = (uint64*) MemoryAllocator::alloc ((KERNEL_STACK_SIZE + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE);
+    Context* context = new Context ();
+    TCB* t = new TCB ();
     if (!kernelStack || !context || !t) {
         if (userStack) {
             MemoryAllocator::free (userStack);
@@ -32,10 +31,10 @@ int TCB::create (TCB** handle, void(*start_routine)(void*), void* arg, void* sta
             MemoryAllocator::free (kernelStack);
         }
         if (context) {
-            MemoryAllocator::free (context);
+            delete context;
         }
         if (t) {
-            MemoryAllocator::free (t);
+            delete t;
         }
         return -1;
     }
@@ -57,15 +56,17 @@ int TCB::create (TCB** handle, void(*start_routine)(void*), void* arg, void* sta
 }
 
 int TCB::exit () {
-    // printString ("TCB::exit\n");
     count--;
+    if (!count) {
+        while (!CCB::outputBufferEmpty ()) {
+            TCB::dispatch ();
+        }
+        exitProgram ();
+    }
     running->state = State::FINISHED;
     TCB* oldRunning = running;
     Scheduler::put (running);
     running = Scheduler::get ();
-    if (!count) {
-        exitProgram ();
-    }
     running->timeRemaining = running->timeSlice;
     running->state = State::RUNNING;
     contextSwitch (oldRunning->context, running->context);
@@ -73,7 +74,6 @@ int TCB::exit () {
 }
 
 void TCB::dispatch () {
-    // printString ("TCB::dispatch\n");
     if (running->getState () == State::RUNNING) {
         running->state = State::READY;
         if (running != idle) {
@@ -90,19 +90,18 @@ void TCB::dispatch () {
 }
 
 int TCB::adopt (TCB** handle) {
-    // printString ("TCB::adopt\n");
-    uint64* kernelStack = (uint64*) MemoryAllocator::alloc (KERNEL_STACK_SIZE);
-    Context* context = (Context*) MemoryAllocator::alloc (sizeof (Context));
-    TCB* t = (TCB*) MemoryAllocator::alloc (sizeof (TCB));
+    uint64* kernelStack = (uint64*) MemoryAllocator::alloc ((KERNEL_STACK_SIZE + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE);
+    Context* context = new Context ();
+    TCB* t = new TCB ();
     if (!kernelStack || !context || !t) {
         if (kernelStack) {
             MemoryAllocator::free (kernelStack);
         }
         if (context) {
-            MemoryAllocator::free (context);
+            delete context;
         }
         if (t) {
-            MemoryAllocator::free (t);
+            delete t;
         }
         return -1;
     }
@@ -118,7 +117,6 @@ int TCB::adopt (TCB** handle) {
 }
 
 void TCB::onTickUpdate () {
-    // printString ("TCB::onTickUpdate\n");
     SleepQueue::forward (1);
     TCB* running = getRunning ();
     if (--running->timeRemaining == 0) {
@@ -127,7 +125,6 @@ void TCB::onTickUpdate () {
 }
 
 int TCB::sleep (time_t time) {
-    // printString ("TCB::sleep\n");
     if (!time) {
         return 0;
     }
@@ -151,7 +148,7 @@ TCB::~TCB () {
         MemoryAllocator::free (kernelStack);
     }
     if (context) {
-        MemoryAllocator::free (context);
+        delete context;
     }
 }
 
@@ -174,13 +171,9 @@ void TCB::setIdle (TCB* t) {
     idle = t;
 }
 
-int TCB::count = -1;
+int TCB::count = -2;
 
 void* TCB::operator new (size_t size) {
-    return MemoryAllocator::alloc ((size + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE);
-}
-
-void* TCB::operator new[] (size_t size) {
     return MemoryAllocator::alloc ((size + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE);
 }
 
@@ -188,6 +181,10 @@ void TCB::operator delete (void* address) {
     MemoryAllocator::free (address);
 }
 
-void TCB::operator delete[] (void* address) {
+void* Context::operator new (size_t size) {
+    return MemoryAllocator::alloc ((size + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE);
+}
+
+void Context::operator delete (void* address) {
     MemoryAllocator::free (address);
 }
